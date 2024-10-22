@@ -6,37 +6,43 @@
 /*   By: pchatagn <pchatagn@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/16 14:41:49 by pchatagn          #+#    #+#             */
-/*   Updated: 2024/10/18 12:01:08 by pchatagn         ###   ########.fr       */
+/*   Updated: 2024/10/21 17:33:29 by pchatagn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "get_next_line.h"
 
-char	*ft_strjoin(char const *s1, char const *s2)
+char	*ft_strjoin(char  *temp, char  *buff)
 {
-	char	*s3;
-	int		i;
-	int		j;
-	int		k;
-	int		len;
-
-	i = ft_strlen(s1);
-	j = ft_strlen(s2);
-	len = j + i;
-	s3 = (char *)malloc((i + j + 1) * sizeof(char));
-	if (!s3)
-		return (NULL);
-	k = 0;
-	while (k < i)
+	char	*s;
+	size_t		i;
+	size_t		j;
+	
+	if (!temp)
 	{
-		s3[k] = s1[k];
-		k++;
+		temp = (char *)malloc(1 *sizeof(char));
+		temp[0] = '\0';
+	}
+	if (!temp || !buff)
+		return (NULL);
+	s = (char *)malloc((ft_strlen(temp) + ft_strlen(buff) + 1) * sizeof(char));
+	if (!s)
+		return (NULL);
+	i = 0;
+	while (temp[i])
+	{
+		s[i] = temp[i];
+		i++;
 	}
 	j = 0;
-	while (k < len)
-		s3[k++] = s2[j++];
-	s3[k] = '\0';
-	return (s3);
+	while (buff[j])
+	{
+		s[i] = buff[j];
+		i++;
+		j++;
+	}
+	s[i] = '\0';
+	return (s);
 }
 
 size_t	ft_strlen(const char *str)
@@ -68,4 +74,20 @@ char	*ft_strdup(const char *s1, int debut, int fin)
 	}
 	ptr[i] = '\0';
 	return (ptr);
+}
+char *get_newline(char *temp, char *new_line, int i)
+{
+
+	new_line = ft_strdup(temp, 0, i + 1);
+	if (!new_line)
+		return (NULL);
+	return (new_line);
+		
+}
+char	*get_trash(char *temp, char *trash, int i)
+{
+	trash = ft_strdup(temp, i + 1, ft_strlen(temp));
+	if (!trash)
+		return (NULL);
+	return (trash);
 }
