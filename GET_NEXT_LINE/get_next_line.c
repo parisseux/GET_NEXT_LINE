@@ -6,7 +6,7 @@
 /*   By: pchatagn <pchatagn@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/22 14:39:56 by pchatagn          #+#    #+#             */
-/*   Updated: 2024/10/23 11:16:13 by pchatagn         ###   ########.fr       */
+/*   Updated: 2024/10/23 14:23:13 by pchatagn         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,16 +20,19 @@ char	*get_trash(char *temp)
 
 	i = 0;
 	j = 0;
-	while (temp[i] && temp[i] != '\n')
+	while (temp[i] != '\0' && temp[i] != '\n')
 		i++;
-	if (!temp[i])
+	if (temp[i] == '\0')
 	{
 		free(temp);
 		return (NULL);
 	}
 	trash = (char *)malloc(sizeof(char) * (ft_strlen(temp) - i + 1));
 	if (!trash)
+	{
+		free(temp);
 		return (NULL);
+	}
 	i++;
 	while (temp[i])
 		trash[j++] = temp[i++];
@@ -38,21 +41,15 @@ char	*get_trash(char *temp)
 	return (trash);
 }
 
-char	*fill_use_buffer(int fd, char *temp)
+char	*fill_use_buffer(int fd, char *temp, int i, char *buffer)
 {
-	char		*buffer;
-	int			i;
-
-	buffer = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
-	if (!buffer)
-		return (NULL);
-	i = 1;
 	while (1)
 	{
 		i = read(fd, buffer, BUFFER_SIZE);
 		if (i == -1)
 		{
 			free(buffer);
+			free(temp);
 			return (NULL);
 		}
 		if (i == 0)
@@ -77,9 +74,9 @@ char	*get_newline(char *temp)
 	int		j;
 	int		i;
 
-	if (*temp == '\0')
-		return (NULL);
 	i = 0;
+	if (temp[i] == '\0')
+		return (NULL);
 	while (temp[i] && temp[i] != '\n')
 		i++;
 	if (temp[i] == '\n')
@@ -95,10 +92,7 @@ char	*get_newline(char *temp)
 		j++;
 	}
 	if (temp[i] == '\n')
-	{
-		new_line[j] = '\n';
-		j++;
-	}
+		new_line[j++] = '\n';
 	new_line[j] = '\0';
 	return (new_line);
 }
@@ -107,35 +101,24 @@ char	*get_next_line(int fd)
 {
 	char		*new_line;
 	static char	*temp;
+	int			i;
+	char		*buffer;
 
 	if (fd < 0 || BUFFER_SIZE <= 0)
 		return (0);
-	temp = fill_use_buffer(fd, temp);
+	buffer = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
+	if (!buffer)
+		return (NULL);
+	i = 1;
+	temp = fill_use_buffer(fd, temp, i, buffer);
 	if (!temp)
 		return (NULL);
 	new_line = get_newline(temp);
 	temp = get_trash(temp);
-	// if (!new_line)
-	// {
-	// 	free(temp);
-	// 	return (NULL);
-	// }
+	if (!new_line)
+	{
+		free(temp);
+		return (NULL);
+	}
 	return (new_line);
 }
-// #include <fcntl.h>
-// int main()
-// {
-// 	FILE* fptr = fopen("test_files.txt", "w");
-// 	fprintf(fptr, "Salut ma petite puce\nJe m'appelle Parissa\nJ'ai 24 ans\nJe suis à l'école 42 :)");
-// 	fclose(fptr);
-// 	fptr = fopen("test_files.txt", "r");
-// 	int fd = fileno(fptr);
-// 	char *line;
-// 	 while ((line = get_next_line(fd)) != NULL)
-//     {
-//         printf("%s", line); 
-//         free(line);  
-//     }
-// 	fclose(fptr);
-// 	return (0);
-// }
