@@ -1,144 +1,141 @@
-# include "get_next_line.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: pchatagn <pchatagn@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/10/22 14:39:56 by pchatagn          #+#    #+#             */
+/*   Updated: 2024/10/23 11:16:13 by pchatagn         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-int	check_temp(char *temp)
+#include "get_next_line.h"
+
+char	*get_trash(char *temp)
 {
-	int i;
+	char	*trash;
+	int		j;
+	int		i;
 
 	i = 0;
-	if (!temp)
-		return (0);
-	while (temp[i])
-	{
-		if (temp[i] == '\n')
-			return (i);
+	j = 0;
+	while (temp[i] && temp[i] != '\n')
 		i++;
-	}
-	return (-1);
-}
-
-char *ft_lastline(char *new_line, char *temp)
-{
-	int i;
-	
-	i = 0;
-	while (temp[i])
+	if (!temp[i])
 	{
-		new_line = (char *)malloc(sizeof(char) * (ft_strlen(temp) + 1));
-		new_line[i] = temp[i];
-		i++;
+		free(temp);
+		return (NULL);
 	}
-	new_line[i] = '\0';
+	trash = (char *)malloc(sizeof(char) * (ft_strlen(temp) - i + 1));
+	if (!trash)
+		return (NULL);
+	i++;
+	while (temp[i])
+		trash[j++] = temp[i++];
+	trash[j] = '\0';
 	free(temp);
-	return (new_line);
+	return (trash);
 }
-// char	*fill_use_buffer(int fd, int i, char *new_line)
-// {
-// 	char		*buffer;
-// 	static char		*temp;
-// 	char	*trash;
 
-// 	buffer = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
-// 	if (!buffer)
-// 		return (NULL);
-// 	buffer[BUFFER_SIZE] = '\0';
-// 	while (i > )
-// 	{
-// 		i = read(fd, buffer, BUFFER_SIZE);
-// 		temp = ft_strjoin(temp, buffer);
-// 		if (i == -1 || ( i == 0 && *temp == '\0'))
-// 			return (NULL);
-// 		free(buffer);
-// 		if (!temp)
-// 			return (NULL);
-// 	}
-// 	if (check_temp(temp) > 0)
-// 	{
-// 		new_line =  get_newline(temp, new_line, check_temp(temp));
-// 		trash = get_trash(temp, trash, check_temp(temp));
-// 		free(temp);
-// 		i = -1;
-// 	}
-	
-// 	if (i == -1 || ( i == 0 && *temp == '\0'))
-// 		return (NULL);
-// 	if (trash)
-// 	{
-// 		temp = ft_strdup(trash, 0, ft_strlen(trash));
-// 		free(trash);
-// 	}	
-// 	return (new_line);
-// }
-
-char	*fill_use_buffer(int fd, int i, char *new_line)
+char	*fill_use_buffer(int fd, char *temp)
 {
 	char		*buffer;
-	static char		*temp;
-	char	*trash;
+	int			i;
 
-	// if (trash)
-	// {
-	// 	temp = ft_strdup(trash, 0, ft_strlen(trash));
-	// 	free(trash);
-	// }	
-	while (i == BUFFER_SIZE)
+	buffer = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
+	if (!buffer)
+		return (NULL);
+	i = 1;
+	while (1)
 	{
-		buffer = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
-		if (!buffer)
-			return (NULL);
 		i = read(fd, buffer, BUFFER_SIZE);
 		if (i == -1)
+		{
+			free(buffer);
 			return (NULL);
-		buffer[BUFFER_SIZE] = '\0';
+		}
+		if (i == 0)
+			break ;
+		buffer[i] = '\0';
 		temp = ft_strjoin(temp, buffer);
 		if (!temp)
+		{
+			free(buffer);
 			return (NULL);
-		if (check_temp(temp) >= 0)
-		{
-			new_line =  get_newline(temp, new_line, check_temp(temp));
-			trash = get_trash(temp, trash, check_temp(temp));
-			free(temp);
-			i = -1;
 		}
-		if (i < BUFFER_SIZE && i > -1 && temp[0] != '\0')
-		{
-			new_line = ft_lastline(new_line, temp);
-			free(temp);
-		}
+		if (ft_strchr(temp))
+			break ;
 	}
-	if (trash)
-	{
-		temp = ft_strdup(trash, 0, ft_strlen(trash));
-		free(trash);
-	}	
-	return (new_line);
+	free(buffer);
+	return (temp);
 }
-char	*get_next_line(int fd)
+
+char	*get_newline(char *temp)
 {
 	char	*new_line;
-	int i;
+	int		j;
+	int		i;
 
-	i = BUFFER_SIZE;
-	if (fd < 0 || BUFFER_SIZE <= 0)
+	if (*temp == '\0')
 		return (NULL);
-	new_line = fill_use_buffer(fd, i, new_line);
+	i = 0;
+	while (temp[i] && temp[i] != '\n')
+		i++;
+	if (temp[i] == '\n')
+		new_line = (char *)malloc(sizeof(char) * (i + 2));
+	else
+		new_line = (char *)malloc(sizeof(char) * (i + 1));
 	if (!new_line)
 		return (NULL);
+	j = 0;
+	while (j < i)
+	{
+		new_line[j] = temp[j];
+		j++;
+	}
+	if (temp[i] == '\n')
+	{
+		new_line[j] = '\n';
+		j++;
+	}
+	new_line[j] = '\0';
 	return (new_line);
 }
 
-int main()
+char	*get_next_line(int fd)
 {
-	FILE* fptr = fopen("test_files.txt", "w");
-	fprintf(fptr, "Salut ma petite puce\nJe m'appelle Parissa\nJ'ai 24 ans\nJe suis à l'école 42 :)");
-	fclose(fptr);
-	fptr = fopen("test_files.txt", "r");
-	int fd = fileno(fptr);
-	char *line;
-	 while ((line = get_next_line(fd)) != NULL)
-    {
-        printf("%s", line); 
-        free(line);  
-    }
-	fclose(fptr);
-	return (0);
+	char		*new_line;
+	static char	*temp;
+
+	if (fd < 0 || BUFFER_SIZE <= 0)
+		return (0);
+	temp = fill_use_buffer(fd, temp);
+	if (!temp)
+		return (NULL);
+	new_line = get_newline(temp);
+	temp = get_trash(temp);
+	// if (!new_line)
+	// {
+	// 	free(temp);
+	// 	return (NULL);
+	// }
+	return (new_line);
 }
+// #include <fcntl.h>
+// int main()
+// {
+// 	FILE* fptr = fopen("test_files.txt", "w");
+// 	fprintf(fptr, "Salut ma petite puce\nJe m'appelle Parissa\nJ'ai 24 ans\nJe suis à l'école 42 :)");
+// 	fclose(fptr);
+// 	fptr = fopen("test_files.txt", "r");
+// 	int fd = fileno(fptr);
+// 	char *line;
+// 	 while ((line = get_next_line(fd)) != NULL)
+//     {
+//         printf("%s", line); 
+//         free(line);  
+//     }
+// 	fclose(fptr);
+// 	return (0);
+// }
